@@ -1,0 +1,221 @@
+openapi: 3.0.1
+info:
+  title: Todo API
+  version: 0.0.1
+  description: API for to-do list server
+
+tags:
+  - name: tasks
+    description: Операции связанные с задачами
+components:
+  schemas:
+    Task:
+      type: object
+      description: Обьект задачи
+      required:
+        - id
+        - title
+        - completed
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Уникальный идентификатор задачи.
+        title:
+          type: string
+          minLength: 1
+          description: Краткое название задачи (до 200 символов).
+        description:
+          type: string
+          description: Детальное описание задачи.
+        completed:
+          type: boolean
+          default: false
+          description: Статус выполнения. true — выполнена, false — нет.
+        createdAt: 
+          type: string
+          format: date-time
+          description: Дата и время создания задачи.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата и время последнего изменения задачи.
+    TaskForPatch:
+      type: object
+      description: Обьект задачи без обязательных полей (для редактирования)
+      properties:
+        title:
+          type: string
+          minLength: 1
+          description: Краткое название задачи (до 200 символов).
+        description:
+          type: string
+          description: Детальное описание задачи.
+        completed:
+          type: boolean
+          default: false
+          description: Статус выполнения. true — выполнена, false — нет.
+        createdAt: 
+          type: string
+          format: date-time
+          description: Дата и время создания задачи.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата и время последнего изменения задачи.
+
+paths: 
+  /tasks:
+    get:
+      tags: ["tasks"]
+      description: Получение списка всех задач.
+      operationId: getAllTasks
+      parameters:
+        - name: limit 
+          in: query
+          required: true
+          description: Сколько обьектов надо передать
+          schema:
+            type: integer
+        - name: offset
+          in: query 
+          required: true
+          description: Сколько обьектов в начале пропустить
+          schema:
+            type: integer
+        - name: filter
+          in: query
+          required: true
+          description: Фильтрация по завершенности
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+        "500":
+          description: "Internal Server Error"
+    post:
+      tags: ["tasks"]
+      operationId: createNewTask
+      description: Создание новой задачи .
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  description: Краткое название задачи (до 200 символов).
+                description:
+                  type: string
+                  description: Детальное описание задачи.
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          description: "Bad Request"
+  /tasks/{taskId}:
+    get:
+      tags: ["tasks"]
+      operationId: getTaskById
+      description: Получение одной задачи по её ID.
+      parameters:
+        - name: taskId
+          description: Уникальный идентификатор задачи.
+          required: true
+          in: path
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: "Not Found"
+    put:
+      description: Полное обновление задачи по ID.
+      parameters:
+        - name: taskId
+          description: Уникальный идентификатор задачи.
+          required: true
+          in: path
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Task"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Not Found"
+    patch:
+      description: Частичное обновление задачи по ID.
+      parameters:
+        - name: taskId
+          description: Уникальный идентификатор задачи.
+          required: true
+          in: path
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskForPatch"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Not Found"
+    delete:
+      description: "Удаление задачи по ID"
+      parameters:
+        - name: taskId
+          description: Уникальный идентификатор задачи.
+          required: true
+          in: path
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: "No Content"
+        "404":
+          description: "No Found"
