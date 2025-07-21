@@ -5,3 +5,6 @@
 план действий сейчас 
 1) написание todo mcp используя openapi 
 2) развертывание локальной модели с доступом к mсp
+
+## стек 
+fastapi pydantic mongodb(beanie odm) ,openapi , llama-server,docker
