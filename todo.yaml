@@ -7,6 +7,8 @@ info:
 tags:
   - name: tasks
     description: Операции связанные с задачами
+  - name: users
+    description: Операции связанные с пользователями
 components:
   schemas:
     Task:
@@ -44,10 +46,7 @@ components:
           format: date-time
           description: Дата и время последнего изменения задачи.
         belongsTo:
-          type:
-            schema:
-              $ref: "#/components/schemas/User"
-          description: Пользователь за которым закреплена данная задача
+          $ref: "#/components/schemas/User"
     TaskForPatch:
       type: object
       description: Обьект задачи без обязательных полей (для редактирования)
@@ -63,19 +62,6 @@ components:
           type: boolean
           default: false
           description: Статус выполнения. true — выполнена, false — нет.
-        createdAt: 
-          type: string
-          format: date-time
-          description: Дата и время создания задачи.
-        updatedAt:
-          type: string
-          format: date-time
-          description: Дата и время последнего изменения задачи.
-        belongsTo:
-          type:
-            schema:
-              $ref: "#/components/schemas/User"
-          description: Пользователь за которым закреплена данная задача
     User:
       type: object
       description: Пользователь сервера
@@ -93,22 +79,27 @@ paths:
       tags: ["tasks"]
       description: Получение списка всех задач.
       operationId: getAllTasks
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X GET "http://127.0.0.1:8000/tasks?limit=10&offset=0&filter=all" -H "accept: application/json"
       parameters:
         - name: limit 
           in: query
-          required: true
+          required: false
           description: Сколько обьектов надо передать
           schema:
             type: integer
         - name: offset
           in: query 
-          required: true
+          required: false
           description: Сколько обьектов в начале пропустить
           schema:
             type: integer
         - name: filter
           in: query
-          required: true
+          required: false
           description: Фильтрация по завершенности
           schema:
             type: string
@@ -126,6 +117,11 @@ paths:
     post:
       tags: ["tasks"]
       operationId: createNewTask
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X POST "http://127.0.0.1:8000/tasks"   -H "Content-Type: application/json"   -d '{"title":"My task","description":"Details","belongsTo":{"_id":123}}'
       description: Создание новой задачи .
       requestBody:
         content:
@@ -155,6 +151,11 @@ paths:
     get:
       tags: ["tasks"]
       operationId: getTaskById
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X GET "http://127.0.0.1:8000/tasks/123" -H "accept: application/json"
       description: Получение одной задачи по её ID.
       parameters:
         - name: taskId
@@ -173,34 +174,15 @@ paths:
                 $ref: "#/components/schemas/Task"
         "404":
           description: "Not Found"
-    put:
-      description: Полное обновление задачи по ID.
-      parameters:
-        - name: taskId
-          description: Уникальный идентификатор задачи.
-          required: true
-          in: path
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Task"
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Task"
-        "400":
-          description: "Bad Request"
-        "404":
-          description: "Not Found"
     patch:
+      tags: ["tasks"]
+      operationId: patchTaskById
       description: Частичное обновление задачи по ID.
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X PATCH "http://127.0.0.1:8000/tasks/123" -H "Content-Type: application/json" -d '{"completed":true}'
       parameters:
         - name: taskId
           description: Уникальный идентификатор задачи.
@@ -227,6 +209,11 @@ paths:
           description: "Not Found"
     delete:
       description: "Удаление задачи по ID"
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X DELETE "http://127.0.0.1:8000/tasks/123"
       parameters:
         - name: taskId
           description: Уникальный идентификатор задачи.
@@ -240,3 +227,32 @@ paths:
           description: "No Content"
         "404":
           description: "No Found"
+  /user:
+    post:
+      tags: ["users"]
+      operationId: createUser
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X POST "http://127.0.0.1:8000/user" -H "Content-Type: application/json" -d '{"id":123}'
+      description: Создать пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: integer
+              description: Уникальный идентификатор пользователя.
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: "Bad Request"
+        "409":
+          description: "Conflict"
+
+                
