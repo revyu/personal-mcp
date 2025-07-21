@@ -18,6 +18,7 @@ components:
         - completed
         - createdAt
         - updatedAt
+        - belongsTo
       properties:
         id:
           type: integer
@@ -42,6 +43,11 @@ components:
           type: string
           format: date-time
           description: Дата и время последнего изменения задачи.
+        belongsTo:
+          type:
+            schema:
+              $ref: "#/components/schemas/User"
+          description: Пользователь за которым закреплена данная задача
     TaskForPatch:
       type: object
       description: Обьект задачи без обязательных полей (для редактирования)
@@ -65,6 +71,21 @@ components:
           type: string
           format: date-time
           description: Дата и время последнего изменения задачи.
+        belongsTo:
+          type:
+            schema:
+              $ref: "#/components/schemas/User"
+          description: Пользователь за которым закреплена данная задача
+    User:
+      type: object
+      description: Пользователь сервера
+      required:
+      - id
+      properties:
+        id: 
+          type: integer
+          format: int64
+          description: Уникальный id пользователя
 
 paths: 
   /tasks:

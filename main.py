@@ -3,13 +3,11 @@ from inspect import _descriptor_get
 from pydantic import BaseModel, Field
 from pydantic.functional_validators import model_validator
 from pydantic_core.core_schema import decimal_schema
-
+from typing import Optional
 import time
 from random import Random
 
 from datetime import datetime
-
-
 
 import logging
 from uvicorn.logging import DefaultFormatter  # ← импортируем класс
@@ -37,16 +35,15 @@ def make_task_id(s:str) -> int:
     rand_bits = rng.getrandbits(64) & MASK_64
     return rand_bits ^ title_hash # XOR для уникальности по title
 
+class User(BaseModel):
+    id:str
+
 
 class Task(BaseModel):
     title:str
     description:str=""
+    belongsTo:User
     id:int = None
-    # cheeky штука на грани фола 
-    # оказывается pydantic скрытно передает в сигнатуру default factory обьект который ему передал клиент
-    # причем уже распаршенным словарем python
-    # Более того он передает только ТЕ поля которые  уже успели инициализироваться 
-    # т.е. если поставить id перед title то будет KeyError
     createdAt:datetime =Field(default_factory=datetime.now)
     updatedAt:datetime =Field(default_factory=datetime.now)
     completed:bool =Field(default=False)
@@ -67,5 +64,4 @@ async def root():
 
 @app.post("/tasks")
 async def createTask(task: Task):
-    
     return {"201":task}
