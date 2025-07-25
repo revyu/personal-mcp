@@ -4,6 +4,10 @@ info:
   version: 0.0.1
   description: API for to-do list server
 
+servers:
+  - url: http://127.0.0.1:8000
+    description: Todo api
+
 tags:
   - name: tasks
     description: Операции связанные с задачами
@@ -73,7 +77,7 @@ components:
           format: int64
           description: Уникальный id пользователя
 
-paths: 
+paths:
   /tasks:
     get:
       tags: ["tasks"]
@@ -83,7 +87,7 @@ paths:
         - lang: curl
           label: cURL
           source: |
-            curl -X GET "http://127.0.0.1:8000/tasks?limit=10&offset=0&filter=all" -H "accept: application/json"
+            curl -X GET "http://127.0.0.1:8000/tasks?limit=10&offset=0&filter=all"
       parameters:
         - name: limit 
           in: query
@@ -138,6 +142,10 @@ paths:
                 description:
                   type: string
                   description: Детальное описание задачи.
+                belongsTo:
+                  description: Пользователь которому принадлежит задача
+                  allOf:
+                    - $ref: "#/components/schemas/User"
       responses:
         "201":
           description: "Created"
@@ -208,6 +216,8 @@ paths:
         "404":
           description: "Not Found"
     delete:
+      tags: ["tasks"]
+      operationId: deleteTaskById
       description: "Удаление задачи по ID"
       x-codeSamples:
         - lang: curl
