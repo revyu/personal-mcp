@@ -20,6 +20,8 @@ from beanie import Document, Indexed, init_beanie
 from bson import Int64 # перевод для mongod
 
 
+import yaml
+
 
 logging.basicConfig(
     level=logging.INFO,            # корневой уровень
@@ -118,7 +120,6 @@ async def getAllTasks(limit:int=20,offset:int=0,filter:Literal["all","completed"
     return {"200":tasks}
 
 
-
 @app.patch("/tasks/{taskId}")
 async def patchTaskById(taskId:int,taskUpd:TaskUpdate):
     
@@ -157,8 +158,19 @@ async def getTaskById(taskId:int):
         return {"404":"Not Found"}
 
 
-
-
+@app.delete("/tasks/{taskId}")
+async def deleteTaskById(taskId:int):
+    """
+    Удаляет таску по id 
+    """
+    task=await Task.find_one(Task.id==taskId)
+    logger.info(f"id {taskId}")
+    if task:
+        await task.delete()
+        return {"204":"No content"}
+    else:
+        logger.info(f"не нашли")
+        return {"404":"Not Found"}
 
 
 @app.post("/user")
@@ -177,3 +189,4 @@ async def createUser(user:User):
     
     await user.insert()
     return {"201":user}
+
